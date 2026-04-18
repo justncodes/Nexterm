@@ -304,6 +304,57 @@
         "deleteFailed": "Failed to delete snippet",
         "reorderFailed": "Failed to reorder snippet"
       }
+    },
+    "import": {
+      "button": "Import",
+      "title": "Import Snippets",
+      "formatLabel": "Format",
+      "format": {
+        "auto": "Auto-detect",
+        "json": "JSON",
+        "yaml": "YAML",
+        "csv": "CSV"
+      },
+      "fileLabel": "Upload file",
+      "filePicker": "Choose file...",
+      "pasteLabel": "Paste content",
+      "placeholder": "Paste JSON, YAML, or CSV here — or upload a file above",
+      "parsedCount": "Parsed {{count}} snippet(s), {{errors}} error(s)",
+      "duplicate": {
+        "label": "When a snippet with the same name already exists",
+        "skip": "Skip",
+        "skipHint": "Leave the existing snippet untouched",
+        "overwrite": "Overwrite",
+        "overwriteHint": "Replace the existing snippet's command and details",
+        "create": "Create",
+        "createHint": "Always create a new snippet (duplicate names allowed)"
+      },
+      "result": {
+        "imported": "{{count}} imported",
+        "updated": "{{count}} updated",
+        "skipped": "{{count}} skipped",
+        "errors": "{{count}} errors",
+        "viewDetails": "View details",
+        "hideDetails": "Hide details",
+        "status": {
+          "imported": "Imported",
+          "updated": "Updated",
+          "skipped": "Skipped",
+          "error": "Error"
+        }
+      },
+      "actions": {
+        "import": "Import",
+        "importing": "Importing...",
+        "close": "Close"
+      },
+      "messages": {
+        "importFailed": "Failed to import snippets",
+        "fileTooLarge": "File is too large (max 5 MB)"
+      }
+    },
+    "export": {
+      "button": "Export"
     }
   },
   "scripts": {

@@ -4,20 +4,22 @@ import { useSnippets } from "@/common/contexts/SnippetContext.jsx";
 import { useScripts } from "@/common/contexts/ScriptContext.jsx";
 import SnippetsList from "@/pages/Snippets/components/SnippetsList";
 import SnippetDialog from "@/pages/Snippets/components/SnippetDialog";
+import SnippetImportDialog from "@/pages/Snippets/components/SnippetImportDialog";
 import ScriptsList from "@/pages/Snippets/components/ScriptsList";
 import ScriptDialog from "@/pages/Snippets/components/ScriptDialog";
 import Button from "@/common/components/Button";
 import PageHeader from "@/common/components/PageHeader";
 import SelectBox from "@/common/components/SelectBox";
 import TabSwitcher from "@/common/components/TabSwitcher";
-import { mdiCodeBraces, mdiPlus, mdiScriptText, mdiCloudDownloadOutline, mdiAccount, mdiDomain } from "@mdi/js";
+import { mdiCodeBraces, mdiPlus, mdiScriptText, mdiCloudDownloadOutline, mdiAccount, mdiDomain, mdiFileImportOutline, mdiFileExportOutline } from "@mdi/js";
 import { useTranslation } from "react-i18next";
-import { getRequest } from "@/common/utils/RequestUtil.js";
+import { downloadFile, getRequest } from "@/common/utils/RequestUtil.js";
 
 export const Snippets = () => {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState(0); // 0 = snippets, 1 = scripts
     const [snippetDialogOpen, setSnippetDialogOpen] = useState(false);
+    const [snippetImportDialogOpen, setSnippetImportDialogOpen] = useState(false);
     const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
     const [editSnippetId, setEditSnippetId] = useState(null);
     const [editScriptId, setEditScriptId] = useState(null);
@@ -179,12 +181,33 @@ export const Snippets = () => {
         }
     };
 
+    const handleExportSnippets = () => {
+        const params = selectedOrganization ? `?organizationId=${selectedOrganization}` : "";
+        downloadFile(`snippets/export${params}`);
+    };
+
     return (
         <div className="snippets-page">
             <PageHeader
                 icon={activeTab === 0 ? mdiCodeBraces : mdiScriptText}
                 title={activeTab === 0 ? t("snippets.page.title") : t("scripts.page.title")}
                 subtitle={activeTab === 0 ? t("snippets.page.subtitle") : t("scripts.page.subtitle")}>
+                {!isSourceSelected && activeTab === 0 && (
+                    <>
+                        <Button
+                            text={t("snippets.import.button")}
+                            icon={mdiFileImportOutline}
+                            onClick={() => setSnippetImportDialogOpen(true)}
+                            variant="secondary"
+                        />
+                        <Button
+                            text={t("snippets.export.button")}
+                            icon={mdiFileExportOutline}
+                            onClick={handleExportSnippets}
+                            variant="secondary"
+                        />
+                    </>
+                )}
                 {!isSourceSelected && (
                     <Button
                         text={activeTab === 0 ? t("snippets.page.addSnippet") : t("scripts.page.addScript")}
@@ -228,6 +251,9 @@ export const Snippets = () => {
 
             <SnippetDialog open={snippetDialogOpen} onClose={closeSnippetDialog} editSnippetId={editSnippetId}
                            selectedOrganization={selectedOrganization} />
+            <SnippetImportDialog open={snippetImportDialogOpen}
+                                 onClose={() => setSnippetImportDialogOpen(false)}
+                                 organizationId={selectedOrganization} />
             <ScriptDialog open={scriptDialogOpen} onClose={closeScriptDialog} editScriptId={editScriptId}
                           selectedOrganization={selectedOrganization} />
         </div>
