@@ -18,3 +18,14 @@ module.exports.snippetEditValidation = Joi.object({
 module.exports.snippetRepositionValidation = Joi.object({
     targetId: Joi.number().integer().required(),
 });
+
+module.exports.snippetImportValidation = Joi.object({
+    snippets: Joi.array().items(Joi.object({
+        name: Joi.string().min(1).max(255).required(),
+        command: Joi.string().min(1).required(),
+        description: Joi.string().allow(null, ""),
+        osFilter: Joi.array().items(Joi.string()).allow(null),
+    })).min(1).max(500).required(),
+    organizationId: Joi.number().integer().allow(null),
+    duplicateStrategy: Joi.string().valid("skip", "overwrite", "create").default("skip"),
+});

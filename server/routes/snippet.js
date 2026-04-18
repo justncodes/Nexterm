@@ -1,10 +1,9 @@
 const { Router } = require("express");
 const { validateSchema } = require("../utils/schema");
-const { createSnippet, deleteSnippet, editSnippet, getSnippet, listAllAccessibleSnippets, listAllSourceSnippets, repositionSnippet } = require("../controllers/snippet");
-const { snippetCreationValidation, snippetEditValidation, snippetRepositionValidation } = require("../validations/snippet");
+const { createSnippet, deleteSnippet, editSnippet, exportSnippets, getSnippet, importSnippets, listAllAccessibleSnippets, listAllSourceSnippets, repositionSnippet } = require("../controllers/snippet");
+const { snippetCreationValidation, snippetEditValidation, snippetImportValidation, snippetRepositionValidation } = require("../validations/snippet");
 const OrganizationMember = require("../models/OrganizationMember");
 const { hasOrganizationAccess } = require("../utils/permission");
-
 const app = Router();
 
 
@@ -35,6 +34,47 @@ app.get("/all", async (req, res) => {
  */
 app.get("/sources", async (req, res) => {
     res.json(await listAllSourceSnippets());
+});
+
+/**
+ * POST /snippet/import
+ * @summary Bulk Import Snippets
+ * @description Imports multiple snippets at once. Duplicate names are handled per the selected strategy (skip/overwrite/create).
+ * @tags Snippet
+ * @produces application/json
+ * @security BearerAuth
+ * @param {object} request.body.required - { snippets: [{name, command, description?, osFilter?}], organizationId?, duplicateStrategy? }
+ * @return {object} 200 - Import summary with imported/updated/skipped/errors counts and per-item details
+ * @return {object} 400 - Invalid payload
+ * @return {object} 403 - No access to the target organization
+ */
+app.post("/import", async (req, res) => {
+    if (validateSchema(res, snippetImportValidation, req.body)) return;
+
+    const organizationId = req.body.organizationId || null;
+
+    if (organizationId && !(await hasOrganizationAccess(req.user.id, organizationId))) {
+        return res.status(403).json({ code: 403, message: "Access denied to this organization" });
+    }
+
+    const result = await importSnippets(req.user.id, {
+        snippets: req.body.snippets,
+        organizationId,
+        duplicateStrategy: req.body.duplicateStrategy || "skip",
+    });
+    if (result?.code) return res.status(result.code).json(result);
+
+    res.json(result);
+});
+
+app.get("/export", async (req, res) => {
+    const organizationId = req.query.organizationId ? parseInt(req.query.organizationId) : null;
+
+    if (organizationId && !(await hasOrganizationAccess(req.user.id, organizationId))) {
+        return res.status(403).json({ code: 403, message: "Access denied to this organization" });
+    }
+
+    res.json(await exportSnippets(req.user.id, organizationId));
 });
 
 /**
