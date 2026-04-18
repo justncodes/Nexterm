@@ -1105,8 +1105,9 @@
           "passwordPlaceholder": "Enter password",
           "passwordPlaceholderEdit": "Leave blank to keep current password",
           "sshKey": "SSH Private Key",
-          "passphrase": "Passphrase (optional)",
-          "passphrasePlaceholder": "Enter passphrase (optional)",
+          "sshKeyConfigured": "A key is already configured. Upload a new one to replace it.",
+          "passphrase": "Passphrase",
+          "passphrasePlaceholder": "Required if the key is encrypted",
           "passphrasePlaceholderEdit": "Leave blank to keep current passphrase"
         },
         "authTypes": {
@@ -1522,7 +1523,8 @@
         "sshKey": "SSH Key",
         "both": "Key+Pass",
         "sshPrivateKey": "SSH Private Key",
-        "passphrase": "Passphrase (optional)",
+        "sshKeyConfigured": "A key is already configured. Upload a new one to replace it.",
+        "passphrase": "Passphrase",
         "new": "New",
         "removeIdentity": "Remove identity",
         "unlinkIdentity": "Unlink identity",

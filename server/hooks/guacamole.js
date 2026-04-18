@@ -7,7 +7,7 @@ const handleGuacJoin = async (ws, sessionId, isShared, shareWritable) => {
     const conn = SessionManager.getConnection(sessionId);
     if (!conn?.guacdClient) {
         logger.debug("handleGuacJoin: no master connection", { sessionId });
-        ws.close(4014, "Master connection not found");
+        ws.close(4014, SessionManager.getConnectionError(sessionId) || "Master connection not found");
         return;
     }
 

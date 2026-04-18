@@ -1,4 +1,4 @@
-import { useEffect, useRef, useContext } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Guacamole from "guacamole-common-js";
 import { UserContext } from "@/common/contexts/UserContext.jsx";
 import { useKeymaps, matchesKeybind } from "@/common/contexts/KeymapContext.jsx";
@@ -29,6 +29,7 @@ const GuacamoleRenderer = ({
     const sessionRef = useRef(session);
     const connectionLoaderRef = useRef(null);
     const audioPlayersRef = useRef([]);
+    const [connectionError, setConnectionError] = useState(null);
 
     useEffect(() => {
         sessionRef.current = session;
@@ -182,15 +183,27 @@ const GuacamoleRenderer = ({
         };
         keyboard.onkeyup = (k, sc) => client.sendKeyEvent(0, k, sc);
 
+        const handleConnectionFailure = (reason) => {
+            if (isCleaningUp) return;
+            connectionLoaderRef.current?.hide();
+            setConnectionError(reason || "Connection closed unexpectedly");
+        };
+
         client.onstatechange = (st) => {
             if (isCleaningUp) return;
-            if (st === Guacamole.Client.State.DISCONNECTED || st === Guacamole.Client.State.ERROR) disconnectFromServer(s.id);
+            if (st === Guacamole.Client.State.DISCONNECTED || st === Guacamole.Client.State.ERROR) {
+                disconnectFromServer(s.id);
+            }
         };
         tunnel.onstatechange = (st) => {
-            if (!isCleaningUp && st === Guacamole.Tunnel.State.CLOSED) disconnectFromServer(s.id);
+            if (!isCleaningUp && st === Guacamole.Tunnel.State.CLOSED) {
+                handleConnectionFailure(tunnel.lastError || null);
+            }
         };
-        tunnel.onerror = () => {
-            if (!isCleaningUp) disconnectFromServer(s.id);
+        tunnel.onerror = (status) => {
+            if (isCleaningUp) return;
+            tunnel.lastError = status?.message || `Connection error (code ${status?.code || "?"})`;
+            handleConnectionFailure(tunnel.lastError);
         };
         handleClipboardEvents();
 
@@ -236,6 +249,22 @@ const GuacamoleRenderer = ({
             <ConnectionLoader onReady={(loader) => {
                 connectionLoaderRef.current = loader;
             }} />
+            {connectionError && (
+                <div style={{
+                    position: "absolute", inset: 0, display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center", gap: "0.75rem",
+                    backgroundColor: "rgba(0, 0, 0, 0.85)", color: "#fff",
+                    fontFamily: "'Plus Jakarta Sans', sans-serif", textAlign: "center", padding: "2rem",
+                    cursor: "default",
+                }}>
+                    <div style={{ fontSize: "2.5rem", color: "#e74c3c" }}>&#10006;</div>
+                    <div style={{ fontSize: "1.25rem", fontWeight: 600 }}>Connection failed</div>
+                    <div style={{ fontSize: "0.95rem", color: "#e0e0e0", maxWidth: "640px", wordBreak: "break-word" }}>{connectionError}</div>
+                    <div style={{ fontSize: "0.8rem", color: "#888", marginTop: "0.5rem" }}>
+                        Close this tab when you're done reviewing the error.
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

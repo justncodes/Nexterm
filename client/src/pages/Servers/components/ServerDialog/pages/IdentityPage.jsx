@@ -14,7 +14,7 @@ const Identity = ({ identity, onUpdate, onDelete, onMoveToOrg, isOrgContext, org
     const [name, setName] = useState(identity.name || "");
     const [username, setUsername] = useState(identity.username || "");
     const [authType, setAuthType] = useState(identity.authType || identity.type || (allowedAuthTypes?.[0] || "password"));
-    const [password, setPassword] = useState(identity.password || "");
+    const [password, setPassword] = useState(isNew ? (identity.password || "") : "********");
     const [sshKey, setSshKey] = useState(identity.sshKey || null);
     const [passphrase, setPassphrase] = useState(identity.passphrase || "");
     const [pwTouched, setPwTouched] = useState(false);
@@ -37,13 +37,14 @@ const Identity = ({ identity, onUpdate, onDelete, onMoveToOrg, isOrgContext, org
         reader.readAsText(e.target.files[0]);
     };
 
+    const passwordReallyChanged = pwTouched || (isNew && password !== "");
     useEffect(() => {
         onUpdate({
             id: identity.id, name, username, authType, scope: identity.scope, organizationId: identity.organizationId,
             ...(authType === "password" || authType === "password-only"
-                ? { password, passwordTouched: pwTouched || isNew || password !== "" }
+                ? { password, passwordTouched: passwordReallyChanged }
                 : authType === "both"
-                ? { password, passwordTouched: pwTouched || isNew || password !== "", sshKey, passphrase, passphraseTouched: ppTouched || passphrase !== "" }
+                ? { password, passwordTouched: passwordReallyChanged, sshKey, passphrase, passphraseTouched: ppTouched || passphrase !== "" }
                 : { sshKey, passphrase, passphraseTouched: ppTouched || passphrase !== "" }),
         });
     }, [name, username, authType, password, sshKey, passphrase, identity.id, pwTouched, ppTouched, isNew]);
@@ -93,6 +94,9 @@ const Identity = ({ identity, onUpdate, onDelete, onMoveToOrg, isOrgContext, org
                         <div className="form-group">
                             <label>{t("servers.dialog.identities.sshPrivateKey")}</label>
                             <Input icon={mdiFileUploadOutline} type="file" autoComplete="off" onChange={readFile} />
+                            {!isNew && !sshKey && (
+                                <span className="field-hint">{t("servers.dialog.identities.sshKeyConfigured")}</span>
+                            )}
                         </div>
                         <div className="form-group">
                             <label>{t("servers.dialog.identities.passphrase")}</label>

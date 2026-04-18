@@ -49,9 +49,9 @@ export const ServerDialog = ({ open, onClose, currentFolderId, currentOrganizati
         const normalized = { ...identity };
         if (normalized.username === "") normalized.username = undefined;
 
-        if (!identity.passwordTouched && normalized.password === "") normalized.password = undefined;
+        if (!identity.passwordTouched && (normalized.password === "" || normalized.password === "********")) normalized.password = undefined;
         if (!identity.passphraseTouched && normalized.passphrase === "") normalized.passphrase = undefined;
-        
+
         if (normalized.sshKey === null) normalized.sshKey = undefined;
         return normalized;
     };

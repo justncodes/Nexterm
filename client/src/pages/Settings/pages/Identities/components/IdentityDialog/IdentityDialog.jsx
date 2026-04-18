@@ -37,15 +37,15 @@ export const IdentityDialog = ({ open, onClose, identity, organizationId }) => {
                 setUsername(identity.username || "");
                 setAuthType(identity.type || "password");
                 setPassword("********");
-                setSshKey(identity.sshKey || null);
-                setPassphrase("********");
+                setSshKey(null);
+                setPassphrase("");
                 initialValues.current = {
                     name: identity.name || '',
                     username: identity.username || '',
                     authType: identity.type || 'password',
                     password: '********',
-                    sshKey: identity.sshKey || null,
-                    passphrase: '********'
+                    sshKey: null,
+                    passphrase: ''
                 };
             } else {
                 resetForm();
@@ -197,6 +197,9 @@ export const IdentityDialog = ({ open, onClose, identity, organizationId }) => {
                                     <label htmlFor="sshKey">{t('settings.identities.dialog.fields.sshKey')}</label>
                                     <IconInput icon={mdiFileUploadOutline} type="file" onChange={readFile} id="sshKey"
                                                required={!isEditing} />
+                                    {isEditing && !sshKey && (
+                                        <span className="field-hint">{t('settings.identities.dialog.fields.sshKeyConfigured')}</span>
+                                    )}
                                 </div>
 
                                 <div className="form-group">

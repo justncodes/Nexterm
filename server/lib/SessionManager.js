@@ -96,6 +96,18 @@ module.exports.onMasterConnectionClosed = (sessionId, reason = "closed") => {
     module.exports.remove(sessionId);
 };
 
+module.exports.markFailed = (sessionId, errorMessage, cleanupDelayMs = 30000) => {
+    const session = module.exports.get(sessionId);
+    if (!session) return;
+    session.connectionError = errorMessage;
+    setTimeout(() => {
+        const current = module.exports.get(sessionId);
+        if (current?.connectionError) module.exports.remove(sessionId);
+    }, cleanupDelayMs);
+};
+
+module.exports.getConnectionError = (sessionId) => module.exports.get(sessionId)?.connectionError || null;
+
 module.exports.initRecording = async (sessionId, organizationId, cols = 80, rows = 24) => {
     const session = module.exports.get(sessionId);
     if (!session?.auditLogId) return false;
