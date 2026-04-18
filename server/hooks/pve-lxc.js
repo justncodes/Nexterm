@@ -4,7 +4,7 @@ const SessionManager = require("../lib/SessionManager");
 const handleShared = (ws, { serverSession }) => {
     const sessionId = serverSession.sessionId;
     const { dataSocket } = SessionManager.getConnection(sessionId) || {};
-    if (!dataSocket || dataSocket.destroyed) return ws.close(4014, "Session not connected");
+    if (!dataSocket || dataSocket.destroyed) return ws.close(4014, SessionManager.getConnectionError(sessionId) || "Session not connected");
 
     const logs = SessionManager.getLogBuffer(sessionId);
     if (logs && ws.readyState === ws.OPEN) ws.send(logs);
@@ -64,7 +64,7 @@ module.exports = async (ws, context) => {
     if (!serverSession) return ws.close(4007, "Session required");
 
     const conn = SessionManager.getConnection(serverSession.sessionId);
-    if (!conn?.dataSocket) return ws.close(4014, "Session not connected");
+    if (!conn?.dataSocket) return ws.close(4014, SessionManager.getConnectionError(serverSession.sessionId) || "Session not connected");
 
     const { dataSocket, auditLogId } = conn;
     const startTime = Date.now();

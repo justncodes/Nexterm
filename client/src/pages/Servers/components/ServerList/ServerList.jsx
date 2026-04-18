@@ -175,6 +175,30 @@ export const ServerList = ({
         return null;
     };
 
+    const findOrganizationForFolder = (folderId, entries, currentOrg = null) => {
+        for (const entry of entries) {
+            if (entry.type === "folder" && entry.id === folderId) {
+                return currentOrg;
+            } else if (entry.type === "organization") {
+                const found = findOrganizationForFolder(folderId, entry.entries || [], entry);
+                if (found) return found;
+            } else if (entry.type === "folder" && entry.entries) {
+                const found = findOrganizationForFolder(folderId, entry.entries, currentOrg);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const getFolderOrganizationId = (folderId) => {
+        if (!servers || folderId == null) return null;
+        const org = findOrganizationForFolder(parseInt(folderId), servers);
+        if (org && org.id) {
+            return parseInt(org.id.toString().split("-")[1]);
+        }
+        return null;
+    };
+
     useEffect(() => {
         if (contextMenu.isOpen && contextClickedType === "server-object" && server?.protocol === "ssh") {
             getRequest("scripts/all").then(setScripts).catch(() => setScripts([]));
@@ -297,7 +321,7 @@ export const ServerList = ({
             setCurrentOrganizationId(parseInt(contextClickedId.toString().split("-")[1]));
         } else {
             setCurrentFolderId(contextClickedId);
-            setCurrentOrganizationId(null);
+            setCurrentOrganizationId(getFolderOrganizationId(contextClickedId));
         }
     };
 

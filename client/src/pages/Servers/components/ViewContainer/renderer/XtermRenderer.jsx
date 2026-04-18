@@ -246,18 +246,23 @@ const XtermRenderer = ({ session, disconnectFromServer, registerTerminalRef, bro
             ws.send(`\x01${term.cols},${term.rows}`);
         }
 
-        ws.onclose = () => {
+        ws.onclose = (event) => {
             clearInterval(interval);
-            if (!isCleaningUp) {
+            if (isCleaningUp) return;
+
+            const isErrorClose = event.code >= 4000 || (event.code !== 1000 && event.code !== 1005 && event.code !== 1001);
+            if (isErrorClose) {
+                connectionLoaderRef.current?.hide();
+                const reason = event.reason || `Connection closed (code ${event.code})`;
+                term.write(`\r\n\r\n\x1b[31m\u2716 Connection failed: ${reason}\x1b[0m\r\n`);
+                term.write(`\x1b[90mClose this tab when you're done reviewing the error.\x1b[0m\r\n`);
+            } else {
                 disconnectFromServer(session.id);
             }
         };
 
         ws.onerror = (error) => {
             console.error('WebSocket error:', error);
-            if (!isCleaningUp) {
-                disconnectFromServer(session.id);
-            }
         };
 
         ws.onmessage = (event) => {

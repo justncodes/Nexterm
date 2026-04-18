@@ -36,7 +36,7 @@ module.exports = async (ws, ctx) => {
     const sessionId = serverSession.sessionId;
     const conn = SessionManager.getConnection(sessionId);
 
-    if (!conn?.dataSocket) return ws.close(4014, "Session not connected");
+    if (!conn?.dataSocket) return ws.close(4014, SessionManager.getConnectionError(sessionId) || "Session not connected");
 
     const startTime = Date.now();
 
