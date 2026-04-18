@@ -4,7 +4,6 @@ const { createSnippet, deleteSnippet, editSnippet, exportSnippets, getSnippet, i
 const { snippetCreationValidation, snippetEditValidation, snippetImportValidation, snippetRepositionValidation } = require("../validations/snippet");
 const OrganizationMember = require("../models/OrganizationMember");
 const { hasOrganizationAccess } = require("../utils/permission");
-
 const app = Router();
 
 
@@ -68,17 +67,6 @@ app.post("/import", async (req, res) => {
     res.json(result);
 });
 
-/**
- * GET /snippet/export
- * @summary Export Snippets
- * @description Returns a JSON array of the user's snippets (personal or organization scope) suitable for re-import.
- * @tags Snippet
- * @produces application/json
- * @security BearerAuth
- * @param {string} organizationId.query - Optional: Organization ID to export organization snippets
- * @return {array} 200 - Snippets as downloadable JSON
- * @return {object} 403 - No access to the target organization
- */
 app.get("/export", async (req, res) => {
     const organizationId = req.query.organizationId ? parseInt(req.query.organizationId) : null;
 
@@ -86,12 +74,7 @@ app.get("/export", async (req, res) => {
         return res.status(403).json({ code: 403, message: "Access denied to this organization" });
     }
 
-    const snippets = await exportSnippets(req.user.id, organizationId);
-
-    const today = new Date().toISOString().slice(0, 10);
-    res.setHeader("Content-Type", "application/json");
-    res.setHeader("Content-Disposition", `attachment; filename="nexterm-snippets-${today}.json"`);
-    res.send(JSON.stringify(snippets, null, 2));
+    res.json(await exportSnippets(req.user.id, organizationId));
 });
 
 /**

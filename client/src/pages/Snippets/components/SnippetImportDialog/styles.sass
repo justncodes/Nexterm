@@ -11,17 +11,76 @@
     font-size: 1.5rem
     font-weight: 600
 
-  .form-row
+  .drop-zone
     display: flex
-    gap: 1rem
+    align-items: center
+    justify-content: center
     margin-bottom: 1.5rem
+    padding: 2rem
+    border: 2px dashed colors.$gray
+    border-radius: 0.75rem
+    background-color: colors.$lighter-background
+    cursor: pointer
+    transition: border-color 0.15s ease, background-color 0.15s ease
 
-    .form-group
-      flex: 1
-      margin-bottom: 0
+    &:hover
+      border-color: colors.$primary
+      background-color: colors.$dark-gray
 
-    .file-picker-group
-      flex: 2
+    &.dragging
+      border-color: colors.$primary
+      background-color: colors.$primary-opacity
+
+    &.has-file
+      cursor: default
+      border-style: solid
+      border-color: colors.$dark-gray
+
+    .drop-zone-empty
+      display: flex
+      flex-direction: column
+      align-items: center
+      gap: 0.5rem
+      color: colors.$subtext
+
+      svg
+        color: colors.$gray
+
+      span
+        font-size: 0.9rem
+
+      .drop-zone-hint
+        font-size: 0.8rem
+        color: colors.$subtext
+
+    .drop-zone-loaded
+      display: flex
+      align-items: center
+      gap: 0.75rem
+      color: colors.$white
+
+      .drop-zone-filename
+        font-size: 0.9rem
+        font-weight: 500
+
+      .drop-zone-clear
+        display: flex
+        align-items: center
+        justify-content: center
+        width: 1.5rem
+        height: 1.5rem
+        margin-left: 0.5rem
+        border: none
+        border-radius: 50%
+        background: colors.$dark-gray
+        color: colors.$subtext
+        font-size: 1.1rem
+        cursor: pointer
+        transition: background-color 0.1s ease, color 0.1s ease
+
+        &:hover
+          background: colors.$gray
+          color: colors.$white
 
   .form-group
     margin-bottom: 1.5rem
@@ -32,72 +91,36 @@
       color: colors.$white
       font-weight: 500
 
-    select
-      width: 100%
-      padding: 0.6rem 0.75rem
-      border: 1px solid colors.$gray
-      border-radius: 0.5rem
-      background-color: colors.$lighter-background
-      color: colors.$white
-      font-size: 0.875rem
-      box-sizing: border-box
+  .parse-status
+    margin-bottom: 1rem
+    padding: 0.5rem 0.75rem
+    border-radius: 0.4rem
+    background-color: colors.$dark-gray
+    color: colors.$light-gray
+    font-size: 0.85rem
 
-      &:focus
-        outline: none
-        border-color: colors.$primary
+    &.has-errors
+      border-left: 3px solid colors.$error
 
-    textarea
-      width: 100%
-      min-height: 180px
-      padding: 0.75rem
-      border: 1px solid colors.$gray
-      border-radius: 0.5rem
-      background-color: colors.$lighter-background
-      color: colors.$white
-      font-family: monospace
-      font-size: 0.85rem
-      resize: vertical
-      box-sizing: border-box
-      transition: border-color 0.1s ease, background-color 0.1s ease
+    .parse-errors
+      margin: 0.5rem 0 0 0
+      padding-left: 1.25rem
+      color: colors.$error
 
-      &:focus
-        outline: none
-        border-color: colors.$primary
-        background-color: colors.$dark-gray
-
-      &::placeholder
-        color: colors.$subtext
-
-    .parse-status
-      margin-top: 0.5rem
-      padding: 0.5rem 0.75rem
-      border-radius: 0.4rem
-      background-color: colors.$dark-gray
-      color: colors.$light-gray
-      font-size: 0.85rem
-
-      &.has-errors
-        border-left: 3px solid colors.$error
-
-      .parse-errors
-        margin: 0.5rem 0 0 0
-        padding-left: 1.25rem
-        color: colors.$error
-
-        li
-          font-size: 0.8rem
-          margin-bottom: 0.25rem
+      li
+        font-size: 0.8rem
+        margin-bottom: 0.25rem
 
   .strategy-options
     display: flex
-    flex-direction: column
     gap: 0.5rem
 
     .strategy-option
       display: flex
-      align-items: flex-start
-      gap: 0.75rem
-      padding: 0.75rem
+      align-items: center
+      gap: 0.5rem
+      flex: 1
+      padding: 0.6rem 0.75rem
       border: 1px solid colors.$dark-gray
       border-radius: 0.5rem
       background-color: colors.$lighter-background
@@ -108,21 +131,26 @@
         border-color: colors.$gray
 
       input[type="radio"]
-        margin-top: 0.15rem
         accent-color: colors.$primary
 
-      .strategy-text
+      .strategy-title
+        color: colors.$white
+        font-size: 0.875rem
+        flex: 1
+
+      .strategy-hint-icon
         display: flex
-        flex-direction: column
-
-        .strategy-title
-          color: colors.$white
-          font-weight: 500
-
-        .strategy-hint
-          color: colors.$light-gray
-          font-size: 0.8rem
-          margin-top: 0.15rem
+        align-items: center
+        justify-content: center
+        width: 1.1rem
+        height: 1.1rem
+        border-radius: 50%
+        border: 1px solid colors.$gray
+        color: colors.$subtext
+        font-size: 0.65rem
+        font-weight: 600
+        cursor: default
+        flex-shrink: 0
 
   .import-result
     margin-bottom: 1.5rem

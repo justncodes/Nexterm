@@ -317,8 +317,10 @@
       },
       "fileLabel": "Upload file",
       "filePicker": "Choose file...",
-      "pasteLabel": "Paste content",
-      "placeholder": "Paste JSON, YAML, or CSV here — or upload a file above",
+      "dropZone": "Drop a file here or click to browse",
+      "dropZoneHint": "Supports JSON, YAML, and CSV files",
+      "pasteLabel": "Or paste content",
+      "placeholder": "Paste JSON, YAML, or CSV here",
       "parsedCount": "Parsed {{count}} snippet(s), {{errors}} error(s)",
       "duplicate": {
         "label": "When a snippet with the same name already exists",

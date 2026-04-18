@@ -13,7 +13,8 @@ import SelectBox from "@/common/components/SelectBox";
 import TabSwitcher from "@/common/components/TabSwitcher";
 import { mdiCodeBraces, mdiPlus, mdiScriptText, mdiCloudDownloadOutline, mdiAccount, mdiDomain, mdiFileImportOutline, mdiFileExportOutline } from "@mdi/js";
 import { useTranslation } from "react-i18next";
-import { downloadFile, getRequest } from "@/common/utils/RequestUtil.js";
+import { getRequest } from "@/common/utils/RequestUtil.js";
+import yaml from "js-yaml";
 
 export const Snippets = () => {
     const { t } = useTranslation();
@@ -181,9 +182,64 @@ export const Snippets = () => {
         }
     };
 
-    const handleExportSnippets = () => {
+    const [exportMenuPos, setExportMenuPos] = useState(null);
+
+    const handleExportClick = (e) => {
+        if (exportMenuPos) {
+            setExportMenuPos(null);
+            return;
+        }
+        const rect = e.currentTarget.getBoundingClientRect();
+        setExportMenuPos({ top: rect.bottom + 6, left: rect.left });
+    };
+
+    useEffect(() => {
+        if (!exportMenuPos) return;
+        const close = () => setExportMenuPos(null);
+        requestAnimationFrame(() => document.addEventListener("click", close));
+        return () => document.removeEventListener("click", close);
+    }, [exportMenuPos]);
+
+    const triggerDownload = (content, filename, mimeType) => {
+        const blob = new Blob([content], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const snippetsToCSV = (data) => {
+        const escape = (val) => {
+            const s = String(val ?? "");
+            return s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
+        };
+        const header = "name,command,description,osFilter";
+        const rows = data.map(s =>
+            [s.name, s.command, s.description || "", (s.osFilter || []).join("|")].map(escape).join(",")
+        );
+        return [header, ...rows].join("\n");
+    };
+
+    const handleExportSnippets = async (format) => {
+        setExportMenuPos(null);
         const params = selectedOrganization ? `?organizationId=${selectedOrganization}` : "";
-        downloadFile(`snippets/export${params}`);
+        const data = await getRequest(`snippets/export${params}`);
+        if (!data || data.code) return;
+
+        const today = new Date().toISOString().slice(0, 10);
+        const base = `nexterm-snippets-${today}`;
+
+        if (format === "yaml") {
+            triggerDownload(yaml.dump(data), `${base}.yaml`, "application/x-yaml");
+        } else if (format === "csv") {
+            triggerDownload(snippetsToCSV(data), `${base}.csv`, "text/csv");
+        } else {
+            triggerDownload(JSON.stringify(data, null, 2), `${base}.json`, "application/json");
+        }
     };
 
     return (
@@ -203,7 +259,7 @@ export const Snippets = () => {
                         <Button
                             text={t("snippets.export.button")}
                             icon={mdiFileExportOutline}
-                            onClick={handleExportSnippets}
+                            onClick={handleExportClick}
                             variant="secondary"
                         />
                     </>
@@ -256,6 +312,15 @@ export const Snippets = () => {
                                  organizationId={selectedOrganization} />
             <ScriptDialog open={scriptDialogOpen} onClose={closeScriptDialog} editScriptId={editScriptId}
                           selectedOrganization={selectedOrganization} />
+
+            {exportMenuPos && (
+                <div className="export-format-menu" style={{ top: exportMenuPos.top, left: exportMenuPos.left }}
+                     onClick={(e) => e.stopPropagation()}>
+                    <button onClick={() => handleExportSnippets("json")}>JSON</button>
+                    <button onClick={() => handleExportSnippets("yaml")}>YAML</button>
+                    <button onClick={() => handleExportSnippets("csv")}>CSV</button>
+                </div>
+            )}
         </div>
     );
 };
